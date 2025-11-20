@@ -108,14 +108,11 @@ Suggest 5 specific, physical products available on Amazon for this person: '{use
 
 ---
 
-## TASK INSTRUCTIONS:
-1.  Skip all conversation, greetings, and introductions.
-2.  IMMEDIATELY return the final output based on the user request.
-3.  **Output Format:** Each product must contain the Name and a brief, expert Description.
-4.  **Use '||' (double pipe) to separate the NAME from the DESCRIPTION.**
-5.  **Use '|' (single pipe) to separate each complete product result.**
-6.  Do not include numbering.
-7.  Example Format: Name || Description | Name || Description | ...
+## CRITICAL OUTPUT INSTRUCTIONS:
+1.  **DO NOT use any introduction, conversation, code fences (```), numbering, or extra characters.**
+2.  **ONLY** return the raw data string.
+3.  **Output Format MUST be EXACTLY:** Name || Description | Name || Description | ...
+4.  Example Format: Studio Microphone || Clear, crisp audio for beginner podcasters | Boom Arm Stand || Keeps the mic off the desk to reduce vibrations | USB Audio Interface || Essential to connect professional mics for pristine sound | ...
 """
 
         # Visual Feedback while waiting
@@ -127,8 +124,10 @@ Suggest 5 specific, physical products available on Amazon for this person: '{use
             
             try:
                 response = model.generate_content(prompt)
+                # --- SAFETY NET: Strip common AI formatting issues ---
+                raw_text = response.text.replace("```", "").replace("json", "").strip() 
                 # 1. Split by single pipe '|' to get 5 separate product strings
-                gift_items = [item.strip() for item in response.text.split('|') if item.strip()]
+                gift_items = [item.strip() for item in raw_text.split('|') if item.strip()]
 
                 # Status update remains, but we don't collapse it with expanded=False
                 status.update(label="✅ Ideas Found!", state="complete")
